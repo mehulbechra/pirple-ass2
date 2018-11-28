@@ -1,0 +1,154 @@
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  font-family: 'Josefin Sans', sans-serif;
+}
+
+.navbar, .footer {
+  font-size: 18px;
+  background-image: linear-gradient(260deg, #2376ae 0%, #c16ecf   100%);
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  padding-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  padding-bottom: 0;
+  height: 70px;
+  align-items: center;
+}
+
+.copyright {
+  color: rgba(255, 255, 255, 0.7);
+  margin-left: 20px;
+}
+
+.main-nav {
+  list-style-type: none;
+  display: flex;
+  margin-right: 30px;
+  justify-content: flex-end;
+}
+
+.main-nav li {
+  text-align: center;
+  margin: 15px auto;
+  margin: 0;
+}
+
+.nav-links,
+.logo {
+    text-decoration: none;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.nav-links {
+  margin-left: 40px;
+}
+
+.logo {
+  margin-top: 0;
+  font-size: 22px;
+  margin-left: 20px;
+  display: inline-block;
+}
+
+.logo:hover,
+    .nav-links:hover {
+        color: rgba(255, 255, 255, 1);
+    }
+
+.main-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 30px;
+}
+
+.main-wrapper {
+  margin-top: 20px;
+  padding: 15px;
+  max-width: 500px;
+  border: 1px solid #2376ae;
+  border-radius: 20px;
+}
+
+.main-button-wrapper {
+  display: flex;
+  justify-content: space-around;
+  align-content: center;
+  padding:10px;
+}
+
+.main-button-wrapper a {
+  text-decoration: none;
+}
+
+.green-button {
+  background-color: #5FAD56;
+  padding: 15px;
+  border-radius: 20px;
+  color:white;
+}
+
+.blue-button {
+  background-color: #388697;
+  padding: 15px;
+  border-radius: 20px;
+  color:white;
+}
+
+.formWrapper {
+  margin: 0 auto;
+  max-width: 600px;
+  padding: 15px;
+}
+
+.formError{
+  display: none;
+  background-color: #c83737;
+  font-style: italic;
+  color: #fff;
+  padding: 10px 15px;
+  border-radius: 5px;
+  margin: 0 0 15px 0;
+  text-align: center;
+  border-color: #d87070;
+  border-width: 2px;
+  border-style: solid;
+}
+
+.formSuccess{
+  display: none;
+  background-color: #217844;
+  font-style: italic;
+  color: #fff;
+  padding: 10px 15px;
+  border-radius: 5px;
+  margin: 0 0 15px 0;
+  text-align: center;
+  border-color: #35c06d;
+  border-width: 2px;
+  border-style: solid;
+}
+
+.inputWrapper {
+  display: flex;
+  justify-content: space-between;
+  margin: 5px;
+  padding: 5px;
+}
+
+input {
+  border: 1px solid lightgray;
+  padding: 5px;
+  border-radius: 10px;
+}
+
+h1,h2 {
+  text-align: center;
+  margin: 10px;
+  padding: 5px;
+}
