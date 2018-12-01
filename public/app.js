@@ -120,21 +120,166 @@ function onSubmit(e) {
 
 // Bind the forms
 app.bindForms = () => {
-  document.querySelector('form').addEventListener('submit', onSubmit);
+  if (document.querySelector('form')) {
+    document.querySelector('form').addEventListener('submit', onSubmit);
+  }
+};
+
+// Bind the logout button
+app.bindLogoutButton = () => {
+  document.getElementById('logoutButton').addEventListener('click', (e) => {
+    // Stop it from redirecting anywhere
+    e.preventDefault();
+
+    // Log the user out
+    app.logUserOut();
+  });
+};
+
+// Log the user out then redirect them
+app.logUserOut = () => {
+  // Get the current token id
+  const tokenId = typeof (app.config.sessionToken.id) === 'string' ? app.config.sessionToken.id : false;
+
+  // Send the current token to the tokens endpoint to delete it
+  const queryStringObject = {
+    id: tokenId,
+  };
+  app.client.request(undefined, 'api/tokens', 'DELETE', queryStringObject, undefined, (statusCode, responsePayload) => {
+    // Set the app.config token as false
+    app.setSessionToken(false);
+
+    // Send the user to the logged out page
+    window.location = '/session/deleted';
+  });
 };
 
 // Form response processor
 app.formResponseProcessor = (formId, requestPayload, responsePayload) => {
   const functionToCall = false;
   if (formId === 'accountCreate') {
-    // @TODO Do something here now that the account has been created successfully
+    // Log in the user
+    const newPayload = {
+      email: requestPayload.email,
+      password: requestPayload.password,
+    };
+
+    app.client.request(undefined, 'api/tokens', 'POST', undefined, newPayload, (newStatusCode, newResponsePayload) => {
+      if (newStatusCode !== 200) {
+        document.querySelector(`#${formId} .formError`).innerHTML = 'Sorry, an error has occured. Please try again.';
+        document.querySelector(`#${formId} .formError`).style.display = 'block';
+      } else {
+        app.setSessionToken(newResponsePayload);
+        window.location = '/edit/cart';
+      }
+    });
   }
+  if (formId === 'sessionCreate') {
+    app.setSessionToken(responsePayload);
+    window.location = '/edit/cart';
+  }
+};
+
+// Set the session token in the app.config object as well as localstorage
+app.setSessionToken = (token) => {
+  app.config.sessionToken = token;
+  const tokenString = JSON.stringify(token);
+  localStorage.setItem('token', tokenString);
+  if (typeof (token) === 'object') {
+    app.setLoggedInClass(true);
+  } else {
+    app.setLoggedInClass(false);
+  }
+};
+
+// Set (or remove) the loggedIn class from the body
+app.setLoggedInClass = (add) => {
+  const target = document.querySelector('body');
+  if (add) {
+    target.classList.add('loggedIn');
+  } else {
+    target.classList.remove('loggedIn');
+  }
+};
+
+// Get the session token from localstorage and set it in the app.config object
+app.getSessionToken = () => {
+  const tokenString = localStorage.getItem('token');
+  if (typeof (tokenString) === 'string') {
+    try {
+      const token = JSON.parse(tokenString);
+      app.config.sessionToken = token;
+      if (typeof (token) === 'object') {
+        app.setLoggedInClass(true);
+      } else {
+        app.setLoggedInClass(false);
+      }
+    } catch (e) {
+      app.config.sessionToken = false;
+      app.setLoggedInClass(false);
+    }
+  }
+};
+
+// Renew the token
+app.renewToken = (callback) => {
+  const currentToken = typeof (app.config.sessionToken) === 'object' ? app.config.sessionToken : false;
+  if (currentToken) {
+    // Update the token with a new expiration
+    const payload = {
+      id: currentToken.id,
+      extend: true,
+    };
+    app.client.request(undefined, 'api/tokens', 'PUT', undefined, payload, (statusCode, responsePayload) => {
+      // Display an error on the form if needed
+      if (statusCode === 200) {
+        // Get the new token details
+        const queryStringObject = { id: currentToken.id };
+        app.client.request(undefined, 'api/tokens', 'GET', queryStringObject, undefined, (newStatusCode, newResponsePayload) => {
+          // Display an error on the form if needed
+          if (newStatusCode === 200) {
+            app.setSessionToken(newResponsePayload);
+            callback(false);
+          } else {
+            app.setSessionToken(false);
+            callback(true);
+          }
+        });
+      } else {
+        app.setSessionToken(false);
+        callback(true);
+      }
+    });
+  } else {
+    app.setSessionToken(false);
+    callback(true);
+  }
+};
+
+// Loop to renew token often
+app.tokenRenewalLoop = () => {
+  setInterval(() => {
+    app.renewToken((err) => {
+      if (!err) {
+        console.log(`Token renewed successfully @ ${Date.now()}`);
+      }
+    });
+  }, 1000 * 60);
 };
 
 // Init (bootstrapping)
 app.init = () => {
   // Bind all form submissions
   app.bindForms();
+
+  // Get the token from localStorage
+  app.getSessionToken();
+
+  // Bind logout logout button
+  app.bindLogoutButton();
+
+  // Renew token
+  app.tokenRenewalLoop();
 };
 
 // Call the init processes after the window loads
